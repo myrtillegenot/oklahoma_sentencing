@@ -20,11 +20,13 @@ library('stringr')
 library('rvest')
 library('xml2')
 library('tidyr')
+library('extrafont')
+library('lemon')
 
 #load data 
 library("readr")
 sentence <- read_fwf(
-  file="~/Downloads/ok_doc/sentence.dat",
+  file="~/Desktop/portfolio/oklahoma/data/sentence.dat",
   fwf_widths(c(11, 40, 40, 9, 40, 10, 10))) %>% 
   rename( DOCNum =1, 
           statute =2, 
@@ -36,7 +38,7 @@ sentence <- read_fwf(
 
 
 profile <- read_fwf(
-  file="~/Downloads/ok_doc/profile.dat",
+  file="~/Desktop/portfolio/oklahoma/data/profile.dat",
   fwf_widths(c(11,30,30,30,5,9,40,9,1,40,40,2,2,4,40,10))) %>% 
   rename( DOCNum =1, 
           lastname =2, 
@@ -62,14 +64,14 @@ raw_dat <- merge(sentence, profile, by="DOCNum") %>%
 # Add offence 
 
 offence <- read_fwf(
-  file="~/Downloads/ok_doc/offence.dat",
+  file="~/Desktop/portfolio/oklahoma/data/offence.dat",
   fwf_widths(c(38,40,1))) %>% 
   rename( statute =1, 
           desc =2, 
           violent =3)
 
 alias <- read_fwf(
-  file="~/Downloads/ok_doc/alias.dat",
+  file="~/Desktop/portfolio/oklahoma/data/alias.dat",
   fwf_widths(c(11,30,30,30,5))) %>% 
   rename( DOCNum =1, 
           lastname =2, 
@@ -204,14 +206,25 @@ n <- rawdat3 %>% group_by(sex) %>% count()
 
 rawdat3$desc <- str_to_title(rawdat3$desc)
 
+#make broader categories -- data on statutes available at Justia website. 
 
+rawdat3$agg_desc <- "Other"
+rawdat3$agg_desc <- ifelse(grepl("§21", rawdat3$statute), "Criminal", rawdat3$agg_desc )
+rawdat3$agg_desc <- ifelse(grepl("§63", rawdat3$statute), "Drugs", rawdat3$agg_desc )
+rawdat3$agg_desc <- ifelse(grepl("§47", rawdat3$statute), "Motor-Vehicle", rawdat3$agg_desc )
+rawdat3$agg_desc <- ifelse(grepl("§68", rawdat3$statute), "Embezzlement", rawdat3$agg_desc )
+rawdat3$agg_desc <- ifelse(grepl("§30", rawdat3$statute), "Hunting", rawdat3$agg_desc )
+
+unique(rawdat3$agg_desc)
                 # Start exploring
 
 #make relevant subset
 explore <- rawdat3 %>% 
-  select(DOCNum, status, firstname, lastname, cv_date, court, code, statute, sentence, probation, desc, violent, county, district, court_state, population, sex, race, dob) %>% 
+  select(DOCNum, status, firstname, lastname, cv_date, court, code, statute, agg_desc, sentence, probation, desc, violent, county, district, court_state, population, sex, race, dob) %>% 
   mutate_at(vars(cv_date), funs(year, month, day)) %>% 
   distinct()
+
+explore$year <- lubridate::ymd(explore$year, truncated = 2L)
 
 
 topcrime_year <- explore %>%
@@ -259,49 +272,88 @@ ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, color=desc)) +
         panel.grid.major.x = element_blank(),
         panel.border=element_blank(), 
         axis.line = element_line())
-  
-# Plot 2: Proportion of women and men each year 
 
-gender_disp <- explore %>% 
-  filter(1969 < year & !year > 2019) %>% 
-  group_by(year, sex) %>% 
-  count(n_distinct(DOCNum)) %>% 
-  mutate(count = sum(n)) %>% 
-  mutate(perc = (n/count)* 100) %>% 
-  rename(dis_DOC =3) %>% 
-  mutate( div_bar = ifelse(sex == "F", -1*dis_DOC, dis_DOC)) 
-
-
-ggplot(gender_disp, aes(year, dis_DOC)) +
-  geom_line(aes(colour= sex))
-  
-
-
-
-ggplot(gender_disp, aes(reorder(year, -div_bar), div_bar)) +
-  geom_bar(aes(fill= sex), stat="identity", width=.8, alpha = 0.8) + 
-  scale_fill_manual(values = wes_palette(name="Royal1"), aesthetics = "fill")+
-  coord_flip() +
-  scale_y_continuous(limits = c(-6000, 20000), 
-                     breaks = c(-6000, -3000, seq(0,20000, 3000)),
-                     labels = c(6000,3000, seq(0,20000, 3000))) +
-  labs(title = "Gendered Yearly Incarceration",
-       subtitle ="Yearly evolution of male vs. female correctional population.\nNeed to add: colours for type of crime. ",
-       y= "Amount Incarcerated",
-       x= "",
-       caption = 'Data from the Oklahoma Department of Corrections.\nDownload : April 2020') +
+ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, color=desc)) +
+  geom_point(alpha=0.2) + 
+  guides(size = FALSE) +
+  scale_size(range = c(.1, 23))  + 
+  scale_fill_manual(values= wes_palette(name = "BottleRocket1"), aesthetics = "colour") +
+  coord_cartesian(clip = "off") +
+  scale_x_date(expand =c(0,0), limits = c(min, max), date_labels="%Y", date_breaks = "5 years")+
+  scale_y_continuous(expand = c(0, 0), limits = c(20, 12000), breaks = c(25, seq(2000, 12000, 1000)), labels = c(25, seq(2000, 12000, 1000))) +
+  labs(y = 'Count of offence',
+       title = 'Top Offences in Oklahoma', 
+       subtitle = 'Count of offence, by incidence rate in that year', 
+       caption = 'Data from the Oklahoma Department of Corrections. \nDownload : April 2020') +
   theme(text = element_text(family = 'Source Sans Pro'),
-        plot.title = element_text(margin = margin(t = 15), face="bold", vjust = 2),
-        axis.title.y = element_text(angle = 0),
-        axis.text.y = element_text(face="bold", size = 7),
-        axis.line.x = element_line(colour = "grey40", size = 0.3), 
-        axis.ticks = element_blank(),
+        #plot text
+        plot.title = element_text(margin = margin(t = 20), face="bold", vjust = 2, family = 'Roboto Black'),
+        plot.subtitle = element_text(size = 9,face="bold", family ="Source Sans Pro"),
         plot.caption = element_text(margin = margin(t = 15), hjust = 0),
-        legend.title = element_blank(),
+        #asix
+        axis.title.y = element_text(size = 9,family ="Roboto Black"),
+        axis.title.x = element_text(size = 9,family ="Roboto Black"),
+        axis.text.y = element_text(face="bold", size = 8),
+        axis.text.x = element_text(size =5, angle = 90), axis.line.x = element_line(colour = "grey40", size = 0.3), 
+        axis.ticks = element_blank(),
+        #legend
+        legend.title = element_blank(), legend.text = element_text(size = 6),
+        legend.key.size = unit(.6, 'cm'), legend.position = "bottom", 
+        legend.background = element_rect(colour ="white", fill=alpha(0.4)),
+        #panels
         panel.background = element_rect(fill = NA),
         panel.grid.major = element_line(colour = "grey50", size = 0.1),
-        panel.grid.major.y = element_blank()) +
+        panel.grid.major.x = element_blank())
+
+  
+# Plot 2: Offence Count per year, men vs. women
+
+gender_crime <- explore %>% 
+  group_by(year, sex, agg_desc) %>% 
+  count() %>% 
+  group_by(sex,year) %>% 
+  mutate( tot_off = sum(n)) %>% 
+  mutate( bar = ifelse(sex == "F", -1*n, n)) 
+
+min <- as.Date("1970-01-01")
+max <- as.Date("2020-01-01")
+
+ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) + 
+  geom_bar(position="stack", stat="identity", alpha =0.9) +
+  scale_fill_manual(values= wes_palette(name = "Zissou1"), aesthetics = "fill") +
+  scale_x_date(expand =c(0,0), limits = c(min, max), date_labels="%Y", date_breaks  ="2 years") +
+  scale_y_continuous(limits = c(-12000, 45000), 
+                     breaks = c(-12000, -9000, -6000, -3000, seq(0,45000, 3000)),
+                     labels = c(12000, 9000, 6000, 3000, seq(0,45000, 3000))) +
+  labs(title = "Gendered Yearly Offences",
+       subtitle ="Yearly evolution of male vs. female offences.\nLetsnfr\n\n",
+       y= "Offence Counts",
+       x= "",
+       caption = 'Data from the Oklahoma Department of Corrections.\nDownload : April 2020') +
+  annotate("text", y = -11500, x = as.Date("1973-06-01"), label = "Women", family="Roboto Black", size = 3) +
+  annotate("text", y = 45000, x = as.Date("1972-08-01"), label = "Men", family="Roboto Black", size = 3) +
+  theme(text = element_text(family = 'Source Sans Pro'),
+        #plot text
+        plot.title = element_text(margin = margin(t = 20), face="bold", vjust = 2, family = 'Roboto Black'),
+        plot.subtitle = element_text(size = 9,face="bold", family ="Source Sans Pro"),
+        plot.caption = element_text(margin = margin(t = 15), hjust = 0),
+        #asix
+        axis.title.y = element_text(angle = 0 , size = 7, margin = margin(t = 0, r = -15 , b = 0, l = 0), family ="Roboto Black"),
+        axis.text.y = element_text(face="bold", size = 8),
+        axis.text.x = element_text(size =5, angle = 90), axis.line.x = element_line(colour = "grey40", size = 0.3), 
+        axis.ticks = element_blank(),
+        #legend
+        legend.title = element_blank(), legend.text = element_text(size = 6),
+        legend.key.size = unit(.4, 'cm'), legend.position = "right", 
+        legend.background = element_rect(fill=alpha(0.4)),
+        #panels
+        panel.background = element_rect(fill = NA),
+        panel.grid.major = element_line(colour = "grey50", size = 0.1),
+        panel.grid.major.y = element_blank())+
   geom_hline(yintercept = 0, colour="white", size =0.5)
+
+
+
 
 
 
