@@ -21,7 +21,7 @@ The history of profit in American prisons is a long and complex one (Jewkes, 200
   Stated explicitly, this research aims to see if the introduction of private prisons led to an increase in average time sentenced per inmate. A "difference-in-difference" regression - a popular causal inference method in econometric research - will be used to do so. Given correct specification (notably, the parallel trends assumption, careful adjustments of standard errors and domain knowledge regarding treatment), results from the regression can be used to estimate the effect of private prisons on sentencing in Oklahoma. 
   
    
- * *Below I quickly outline my data gathering and cleaning process* *
+ * *Below I quickly outline my data gathering and cleaning process* 
   
 ### Data Cleaning
 
