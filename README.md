@@ -3,7 +3,7 @@ Data/scripts &amp; snippets of analysis for thesis project.
 
 * *This contains the scripts as well as introductory insights to my final capstone project  as part of the curriculum for the Masters in Applied Economics at the University of San Francisco.* *
 
-* *This section goes over my introduction. To go straight to the data cleaning script, please open Oklahoma.R above. The script is heavily annotated and designed to be shared with non-R users (Stata), so made to be as simple as possible* *
+* *This section goes over my introduction. To go straight to the data cleaning script, please open Oklahoma.R script in the script folder above. The script is heavily annotated and designed to be shared with non-R users (Stata).* *
 
 ## In Whose Interest : Private Prisons & Sentencing Lengths
 
