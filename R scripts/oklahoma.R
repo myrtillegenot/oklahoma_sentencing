@@ -29,6 +29,7 @@ library('grid')
 library('ggplot2')
 library('lattice')
 library('cowplot')
+library('wesanderson')
 
 #load data 
 library("readr")
@@ -294,7 +295,7 @@ plot1 <- ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, fill=clean_des
         plot.margin = unit(c(0,1,0,1), "cm"))
 plot1
 
-ggsave("plot_1.pdf", width = 5, height = 6)
+ggsave("plot_1.png", width = 6, height = 6)
 
 
 
@@ -348,7 +349,7 @@ plot2 <- ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) +
         panel.grid.major.y = element_blank())+
   geom_hline(yintercept = 0, colour="white", size =0.5)
 
-ggsave('plot_2.png', plot2, width=5, height=5)
+ggsave('plot_2.png', plot2, width=6, height=6)
 
 # Plot 3 : Evolution of crime 
 
