@@ -5,7 +5,7 @@ Data/scripts &amp; snippets of analysis for thesis project.
 
 * *This section goes over my introduction. To go straight to the data cleaning script, please open Oklahoma.R above. The script is heavily annotated and designed to be shared with non-R users (Stata), so made to be as simple as possible* *
 
-## In Whose Interest : Private Prisons & Sentencing Lengths**
+## In Whose Interest : Private Prisons & Sentencing Lengths
 
 Prisons are ill-defined. Are they meant to rehabilitate? Are they meant to punish? Can both these purposes co-exist? These important questions have often been swept under the rug in favour of 'protecting the public' from criminals. This mindset has some serious negative externalities. The first, and most obvious, is economic. Housing, feeding, clothing, supervising and disciplining any human being is an onerous activity. The second is the cost of the thousands of lives which are siphoned into this system. By all accounts, the prison system disproportionately punishes African-Americans. This is not an artefact of differing rates of criminality, but is indeed by design. Undeniably, the American prison system is a direct legacy of slavery. 
 
