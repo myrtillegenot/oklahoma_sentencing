@@ -22,6 +22,13 @@ library('xml2')
 library('tidyr')
 library('extrafont')
 library('lemon')
+library('ggrepel')
+library('ggtext')
+library('gridExtra')
+library('grid')
+library('ggplot2')
+library('lattice')
+library('cowplot')
 
 #load data 
 library("readr")
@@ -120,6 +127,7 @@ rawdat2$county <- str_extract(rawdat2$court , ".*Court") %>%
 
 # Define level for each court
 rawdat2$court_state <- ifelse(grepl("Jurisdiction",rawdat2$court), "Out_of_state", "In_state")
+rawdat2$court_state <- ifelse(grepl("Arizona Court",rawdat2$court), "Out_of_state", rawdat2$court_state)
 rawdat2$court_state <- ifelse(grepl("District Office",rawdat2$court), "In_state", rawdat2$court_state )
 rawdat2$court_state <- ifelse(grepl("United States Jurisdiction", rawdat2$court), "Federal", rawdat2$court_state)
 
@@ -223,91 +231,72 @@ explore <- rawdat3 %>%
   select(DOCNum, status, firstname, lastname, cv_date, court, code, statute, agg_desc, sentence, probation, desc, violent, county, district, court_state, population, sex, race, dob) %>% 
   mutate_at(vars(cv_date), funs(year, month, day)) %>% 
   distinct()
-
+#turn Year to Date format for graphs
 explore$year <- lubridate::ymd(explore$year, truncated = 2L)
 
+write_csv(explore, "oklahoma_clean.csv")
 
+
+# Plot 1 : Top Crime : Count and as % of crime
+
+# Count of top offence, and its percentage occurance relatiove to total offences for the year
 topcrime_year <- explore %>%
-  filter(1969 < year) %>% 
   group_by(year) %>% 
   count(statute,desc) %>% 
   mutate(tot_offence = sum(n), perc = (n/tot_offence)*100) %>% 
   slice(which.max(n))
 
-library('ggrepel')
-library('ggtext')
+# clean up decription names for plot
+unique(topcrime_year$desc)
+topcrime_year$clean_desc <- "Clean"
+topcrime_year$clean_desc  <- ifelse(grepl("Dui", topcrime_year$desc), "DUI", topcrime_year$clean_desc)
+topcrime_year$clean_desc  <- ifelse(grepl("Robbery", topcrime_year$desc), "Robbery w/ Dangerous Weapon", topcrime_year$clean_desc)
+topcrime_year$clean_desc  <- ifelse(grepl("Burglary", topcrime_year$desc), "Burglary 2nd Degree", topcrime_year$clean_desc)
+topcrime_year$clean_desc  <- ifelse(grepl("Dist", topcrime_year$desc), "Distri. Controlled Substance", topcrime_year$clean_desc)
+topcrime_year$clean_desc  <- ifelse(grepl("Poss", topcrime_year$desc), "Poss. Controlled Substance", topcrime_year$clean_desc)
 
+# plot 1 
+min1 <- as.Date("1970-01-01")
+max1 <- as.Date("2019-01-01")
 
-
-# Plot 1 : Leave this for now 
-
-# Fix colours, legend, add key for size of circle, increase distance for title, 
-# blod axis ticks, bold title, clean axis lines and annotate 2020
-
-ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, color=desc)) +
-  geom_point(alpha=0.2) + 
-  guides(size = FALSE) +
-  scale_size(range = c(.1, 23))  + 
-  scale_fill_manual(values= wes_palette(name = "BottleRocket1"), aesthetics = "colour") +
+ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, fill=clean_desc)) +
+  geom_point(alpha=0.35, shape =21, color ="grey40") + 
+  guides(fill = guide_legend(override.aes = list(size = 4))) +
+  scale_size(range = c(.1, 15), limits = c(5,25), labels =c("5%", "10%","15%","20%","25%")) +
+  scale_fill_manual(values= wes_palette(name = "Darjeeling1"), aesthetics = "fill") +
+  scale_x_date(expand = c(0, 0), limits=c(min1,max1), date_labels="%Y", date_breaks  ="7 years") +
+  scale_y_continuous(expand = c(0, 0), limits = c(20, 13000), breaks = c(20, seq(2000, 13000, 1000)), labels = c(20, seq(2000, 13000, 1000))) +
   coord_cartesian(clip = "off") +
-  scale_y_continuous(expand = c(0, 0), limits = c(20, 12000), breaks = c(25, seq(2000, 12000, 1000)), labels = c(25, seq(2000, 12000, 1000))) +
   labs(y = 'Count of offence',
        title = 'Top Offences in Oklahoma', 
-       subtitle = 'Count of offence, by incidence rate in that year', 
-       caption = 'Data from the Oklahoma Department of Corrections. \nDownload : April 2020') +
-  theme(text = element_text(family = 'Source Sans Pro'),
-        plot.title = element_text(margin = margin(t = 15),face="bold"),
-        plot.subtitle = element_text(),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.margin = unit(c(1,1,1,1),"cm"), 
-        legend.position = "bottom",
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.background = element_rect(fill=alpha(0.4)),
-        axis.line.x = element_blank(), axis.ticks.x = element_blank(),
-        axis.line.y = element_line(colour="grey40", size = 0.3), axis.ticks.y = element_blank(),
-        panel.background = element_rect(fill = NA),
-        panel.grid.major = element_line(colour = "grey50", size = 0.1),
-        panel.grid.major.x = element_blank(),
-        panel.border=element_blank(), 
-        axis.line = element_line())
-
-ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, color=desc)) +
-  geom_point(alpha=0.2) + 
-  guides(size = FALSE) +
-  scale_size(range = c(.1, 23))  + 
-  scale_fill_manual(values= wes_palette(name = "BottleRocket1"), aesthetics = "colour") +
-  coord_cartesian(clip = "off") +
-  scale_x_date(expand =c(0,0), limits = c(min, max), date_labels="%Y", date_breaks = "5 years")+
-  scale_y_continuous(expand = c(0, 0), limits = c(20, 12000), breaks = c(25, seq(2000, 12000, 1000)), labels = c(25, seq(2000, 12000, 1000))) +
-  labs(y = 'Count of offence',
-       title = 'Top Offences in Oklahoma', 
-       subtitle = 'Count of offence, by incidence rate in that year', 
+       subtitle = 'Count of offence, by incidence rate in that year\n\n',
        caption = 'Data from the Oklahoma Department of Corrections. \nDownload : April 2020') +
   theme(text = element_text(family = 'Source Sans Pro'),
         #plot text
         plot.title = element_text(margin = margin(t = 20), face="bold", vjust = 2, family = 'Roboto Black'),
         plot.subtitle = element_text(size = 9,face="bold", family ="Source Sans Pro"),
-        plot.caption = element_text(margin = margin(t = 15), hjust = 0),
+        plot.caption = element_text(margin = margin(t = 15), hjust = 0, size =8),
         #asix
-        axis.title.y = element_text(size = 9,family ="Roboto Black"),
-        axis.title.x = element_text(size = 9,family ="Roboto Black"),
-        axis.text.y = element_text(face="bold", size = 8),
-        axis.text.x = element_text(size =5, angle = 90), axis.line.x = element_line(colour = "grey40", size = 0.3), 
-        axis.ticks = element_blank(),
+        axis.title.y = element_text(size = 9,family ="Roboto Black", angle =90, vjust = 5),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face="bold", size = 8, angle = 0),
+        axis.text.x = element_text(size =5),
+        axis.line.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.line.y = element_line(colour="grey40", size = 0.3), axis.ticks.y = element_blank(),
         #legend
-        legend.title = element_blank(), legend.text = element_text(size = 6),
-        legend.key.size = unit(.6, 'cm'), legend.position = "bottom", 
-        legend.background = element_rect(colour ="white", fill=alpha(0.4)),
+        legend.title = element_blank(), legend.text = element_text(size = 7),
+        legend.key = element_blank(), legend.position = "bottom", legend.box="vertical", 
+        legend.background = element_rect(colour ="white", fill=alpha(0.8)),
         #panels
         panel.background = element_rect(fill = NA),
         panel.grid.major = element_line(colour = "grey50", size = 0.1),
-        panel.grid.major.x = element_blank())
+        panel.grid.major.x = element_blank(),
+        plot.margin = unit(c(1,1,1,1), "cm"))
 
-  
+
 # Plot 2: Offence Count per year, men vs. women
 
+# Get offence, count by sex and type of crime
 gender_crime <- explore %>% 
   group_by(year, sex, agg_desc) %>% 
   count() %>% 
@@ -315,8 +304,11 @@ gender_crime <- explore %>%
   mutate( tot_off = sum(n)) %>% 
   mutate( bar = ifelse(sex == "F", -1*n, n)) 
 
+#set date limits
 min <- as.Date("1970-01-01")
 max <- as.Date("2020-01-01")
+
+#plot 2
 
 ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) + 
   geom_bar(position="stack", stat="identity", alpha =0.9) +
@@ -330,21 +322,21 @@ ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) +
        y= "Offence Counts",
        x= "",
        caption = 'Data from the Oklahoma Department of Corrections.\nDownload : April 2020') +
-  annotate("text", y = -11500, x = as.Date("1973-06-01"), label = "Women", family="Roboto Black", size = 3) +
+  annotate("text", y = -11500, x = as.Date("1973-03-01"), label = "Women", family="Roboto Black", size = 3) +
   annotate("text", y = 45000, x = as.Date("1972-08-01"), label = "Men", family="Roboto Black", size = 3) +
   theme(text = element_text(family = 'Source Sans Pro'),
         #plot text
         plot.title = element_text(margin = margin(t = 20), face="bold", vjust = 2, family = 'Roboto Black'),
-        plot.subtitle = element_text(size = 9,face="bold", family ="Source Sans Pro"),
-        plot.caption = element_text(margin = margin(t = 15), hjust = 0),
+        plot.subtitle = element_text(size = 9, family ="Source Sans Pro"),
+        plot.caption = element_text(margin = margin(t = 15), hjust = 0, size =9),
         #asix
-        axis.title.y = element_text(angle = 0 , size = 7, margin = margin(t = 0, r = -15 , b = 0, l = 0), family ="Roboto Black"),
+        axis.title.y = element_text(angle = 0 , size = 7, margin = margin(t = 0, r = -20 , b = 0, l = 0), family ="Roboto Black"),
         axis.text.y = element_text(face="bold", size = 8),
         axis.text.x = element_text(size =5, angle = 90), axis.line.x = element_line(colour = "grey40", size = 0.3), 
         axis.ticks = element_blank(),
         #legend
         legend.title = element_blank(), legend.text = element_text(size = 6),
-        legend.key.size = unit(.4, 'cm'), legend.position = "right", 
+        legend.key.size = unit(.4, 'cm'), legend.position = "bottom", 
         legend.background = element_rect(fill=alpha(0.4)),
         #panels
         panel.background = element_rect(fill = NA),
@@ -352,8 +344,19 @@ ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) +
         panel.grid.major.y = element_blank())+
   geom_hline(yintercept = 0, colour="white", size =0.5)
 
+# Plot 3 : Evolution of crime 
 
+min3 <- as.Date("1985-01-01")
+max3 <- as.Date("2019-01-01")
 
+growth_county <- explore %>% 
+  filter(code == "Incarceration" , year >= min3, year <= max3, court_state =="In_state") %>% 
+  group_by(year, county) %>% 
+  mutate(num = sum(n_distinct(DOCNum))) %>% 
+  select( year, county, num) %>% 
+  arrange(county, year) 
+
+# growth rate in percent
 
 
 
