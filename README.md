@@ -1,4 +1,4 @@
-# Oklahoma_prison_project
+# Oklahoma Capstone Project
 Data/scripts &amp; snippets of analysis for thesis project. 
 
 * *This contains the scripts as well as introductory insights to my final capstone project  as part of the curriculum for the Masters in Applied Economics at the University of San Francisco.* *
@@ -62,7 +62,7 @@ plot1 <- ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) +
   geom_hline(yintercept = 0, colour="white", size =0.5)
 ```
 
-
+![alt text](https://github.com/myrtillegenot/oklahoma_sentencing/graphs/plot1.jpg?raw=true)
 
 This led me to thinking about which crimes were the most popular per year. I thus created this graph, which looks at what offence was the most 'popular' per year, and the percentage it played relative to total offence for that year. 
 
@@ -102,6 +102,7 @@ plot2 <- ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, fill=clean_des
         plot.margin = unit(c(1,1,1,1), "cm"))
 ```
 
+![alt text](https://github.com/myrtillegenot/oklahoma_sentencing/graphs/plot2.jpg?raw=true)
 
 
 
