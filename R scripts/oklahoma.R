@@ -259,7 +259,7 @@ topcrime_year$clean_desc  <- ifelse(grepl("Poss", topcrime_year$desc), "Poss. Co
 min1 <- as.Date("1970-01-01")
 max1 <- as.Date("2019-01-01")
 
-ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, fill=clean_desc)) +
+plot1 <- ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, fill=clean_desc)) +
   geom_point(alpha=0.35, shape =21, color ="grey40") + 
   guides(fill = guide_legend(override.aes = list(size = 4))) +
   scale_size(range = c(.1, 15), limits = c(5,25), labels =c("5%", "10%","15%","20%","25%")) +
@@ -291,7 +291,11 @@ ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, fill=clean_desc)) +
         panel.background = element_rect(fill = NA),
         panel.grid.major = element_line(colour = "grey50", size = 0.1),
         panel.grid.major.x = element_blank(),
-        plot.margin = unit(c(1,1,1,1), "cm"))
+        plot.margin = unit(c(0,1,0,1), "cm"))
+plot1
+
+ggsave("plot_1.pdf", width = 5, height = 6)
+
 
 
 # Plot 2: Offence Count per year, men vs. women
@@ -310,7 +314,7 @@ max <- as.Date("2020-01-01")
 
 #plot 2
 
-ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) + 
+plot2 <- ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) + 
   geom_bar(position="stack", stat="identity", alpha =0.9) +
   scale_fill_manual(values= wes_palette(name = "Zissou1"), aesthetics = "fill") +
   scale_x_date(expand =c(0,0), limits = c(min, max), date_labels="%Y", date_breaks  ="2 years") +
@@ -318,7 +322,7 @@ ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) +
                      breaks = c(-12000, -9000, -6000, -3000, seq(0,45000, 3000)),
                      labels = c(12000, 9000, 6000, 3000, seq(0,45000, 3000))) +
   labs(title = "Gendered Yearly Offences",
-       subtitle ="Yearly evolution of male vs. female offences.\nLetsnfr\n\n",
+       subtitle ="Yearly evolution of male vs. female offences.\n\n\n",
        y= "Offence Counts",
        x= "",
        caption = 'Data from the Oklahoma Department of Corrections.\nDownload : April 2020') +
@@ -343,6 +347,8 @@ ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) +
         panel.grid.major = element_line(colour = "grey50", size = 0.1),
         panel.grid.major.y = element_blank())+
   geom_hline(yintercept = 0, colour="white", size =0.5)
+
+ggsave('plot_2.png', plot2, width=5, height=5)
 
 # Plot 3 : Evolution of crime 
 
