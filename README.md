@@ -92,7 +92,7 @@ plot1 <- ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, fill=clean_des
   I wanted to further explore the types of offences committed. To do this, I counted total offence numbers grouped by year and type. I retained the top offence, and tried to represent it in a way that would show * *how* popular an offence was across years, and within year. As such, this graph is colour coded by crime type and area coded by % of offence it accounts for that year. 
   
 
- **Figure 2 **
+**Figure 2**
  
  
 This led me to thinking about which crimes were the most popular per year. I thus created this graph, which looks at what offence was the most 'popular' per year, and the percentage it played relative to total offence for that year. 
