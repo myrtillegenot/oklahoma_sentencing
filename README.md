@@ -61,8 +61,8 @@ plot1 <- ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) +
         panel.grid.major.y = element_blank())+
   geom_hline(yintercept = 0, colour="white", size =0.5)
 ```
+![png](/graphs/plot1.png)
 
-![alt_text](https://github.com/myrtillegenot/oklahoma_sentencing/graphs/plot1.png?raw=true)
 
 This led me to thinking about which crimes were the most popular per year. I thus created this graph, which looks at what offence was the most 'popular' per year, and the percentage it played relative to total offence for that year. 
 
@@ -102,7 +102,7 @@ plot2 <- ggplot(data = topcrime_year, aes(x=year, y=n, size=perc, fill=clean_des
         plot.margin = unit(c(1,1,1,1), "cm"))
 ```
 
-![alt text](https://github.com/myrtillegenot/oklahoma_sentencing/graphs/plot2.png?raw=true)
+![png](/graphs/plot2.png)
 
 
 
