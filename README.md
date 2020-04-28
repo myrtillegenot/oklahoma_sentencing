@@ -3,22 +3,25 @@ Data/scripts &amp; snippets of analysis for thesis project.
 
 * *This contains the scripts as well as introductory insights to my final capstone project  as part of the curriculum for the Masters in Applied Economics at the University of San Francisco.* *
 
-* *This section goes over my introduction. To go straight to the data cleaning script, please open Oklahoma.R above. The script is heavily annotated and designed to be shared with non-R users (Stata), so made to be as simple as possible* *
+* *This section goes over my introduction. To go straight to the data cleaning script, please open Oklahoma.R script in the script folder above. The script is heavily annotated and designed to be shared with non-R users (Stata).* *
 
 ## In Whose Interest : Private Prisons & Sentencing Lengths
 
-Prisons are ill-defined. Are they meant to rehabilitate? Are they meant to punish? Can both these purposes co-exist? These important questions have often been swept under the rug in favour of 'protecting the public' from criminals. This mindset has some serious negative externalities. The first, and most obvious, is economic. Housing, feeding, clothing, supervising and disciplining any human being is an onerous activity. The second is the cost of the thousands of lives which are siphoned into this system. By all accounts, the prison system disproportionately punishes African-Americans. This is not an artefact of differing rates of criminality, but is indeed by design. Undeniably, the American prison system is a direct legacy of slavery. 
+Prisons are ill-defined. Are they meant to rehabilitate? Are they meant to punish? Can both these purposes co-exist? These important questions have often been swept under the rug in favour of 'protecting the public' from criminals. However, this mindset has some serious negative externalities. 
 
-  These two concerns crystallize in a specific segment of the correctional landscape : the private prison corporation. 
+
+The first, and most obvious, is economic. Housing, feeding, clothing, supervising and disciplining any human being is an onerous activity. The second is the cost of the thousands of lives which are siphoned into this system. By all accounts, the prison system disproportionately punishes African-Americans. This is not an artefact of differing rates of criminality, but is indeed by design. Undeniably, the American prison system is a direct legacy of slavery. 
+
+These two concerns crystallize in a specific segment of the correctional landscape : the private prison corporation. 
   
-  The history of profit in American prisons is a long and complex one (Jewkes, 2007). These institutions continue to play an important role in modern times, making up roughly 23% of all state and federal institutions (Kirchoff, 2010). Despite this, they have received considerably little empirical scholarship. This is surprising. Being for-profit institutions, private prisons financially benefit from high incarceration rates. On the other hand, wider social utility is maximised when incarceration is as low as possible, as every marginal inmate incurs a non-trivial cost on the public purse. This introduces contesting incentives into the prison system.
+The history of profit in American prisons is a long and complex one (Jewkes, 2007). These institutions continue to play an important role in modern times, making up roughly 23% of all state and federal institutions (Kirchoff, 2010). Despite this, they have received considerably little empirical scholarship. This is surprising. Being for-profit institutions, private prisons financially benefit from high incarceration rates. On the other hand, wider social utility is maximised when incarceration is as low as possible, as every marginal inmate incurs a non-trivial cost on the public purse. This introduces contesting incentives into the prison system.
   
   This essay aims to examine these differing incentives through the specific lens of sentencing lenghts. Although sentencing lengths are often not served in their entirety, they play a critical role in keeping prison population high. Indeed, research indicates that decreasing sentencing by a month would lead to a reduction of incarceration by up to 50,000 inmates (Kirchoff, 2010). To do so, Department of Corrections (henceforth : DOC) data from both Oklahoma - whose prison systems heavily depends on private prisons - and Missouri, a neighbouring state which does not, will be used. Both are publicly available, at [http://doc.ok.gov/odoc-public-inmate-data] and [https://doc.mo.gov/media-center/sunshine-law#datafile]. 
   
   Stated explicitly, this research aims to see if the introduction of private prisons led to an increase in average time sentenced per inmate. A "difference-in-difference" regression - a popular causal inference method in econometric research - will be used to do so. Given correct specification (notably, the parallel trends assumption, careful adjustments of standard errors and domain knowledge regarding treatment), results from the regression can be used to estimate the effect of private prisons on sentencing in Oklahoma. 
   
    
- * *Below I quickly outline my data gathering and cleaning process* *
+ * *Below I quickly outline my data gathering and cleaning process* 
   
 ### Data Cleaning
 
