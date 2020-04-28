@@ -327,7 +327,7 @@ plot2 <- ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) +
        y= "Offence Counts",
        x= "",
        caption = 'Data from the Oklahoma Department of Corrections.\nDownload : April 2020') +
-  annotate("text", y = -11500, x = as.Date("1973-03-01"), label = "Women", family="Roboto Black", size = 3) +
+  annotate("text", y = -11500, x = as.Date("1973-06-01"), label = "Women", family="Roboto Black", size = 3) +
   annotate("text", y = 45000, x = as.Date("1972-08-01"), label = "Men", family="Roboto Black", size = 3) +
   theme(text = element_text(family = 'Source Sans Pro'),
         #plot text
@@ -349,7 +349,9 @@ plot2 <- ggplot(gender_crime, aes(fill=agg_desc, y=bar, x=year)) +
         panel.grid.major.y = element_blank())+
   geom_hline(yintercept = 0, colour="white", size =0.5)
 
-ggsave('plot_2.png', plot2, width=6, height=6)
+plot2
+
+ggsave('plot_3.png', width=6, height=6)
 
 # Plot 3 : Evolution of crime 
 
