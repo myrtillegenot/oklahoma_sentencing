@@ -2,7 +2,7 @@
 # Code : Thesis Code with OK_DOC data
 # Date: 18/04/2020
 
-
+# Add naming convention 
 
 library('Rcpp')
 library('haven') 
@@ -180,7 +180,7 @@ rawdat3$cv_date <- parse_date_time2(rawdat3$cv_date, "%d-%B-%y", cutoff_2000 =20
 
 
 # (9) Sentence Incarceration 
-rawdat3$sentence <- as.numeric(rawdat3$inc_years) * 365
+rawdat3$sentence <- as.numeric(rawdat3$inc_years) * 365.25
 rawdat3$code <- ifelse(rawdat3$sentence %in% c(0, NA), "Probation", "Incarceration")
 
 rawdat3$code <- ifelse(rawdat3$sentence %in% c(3649635), "Death", rawdat3$code)
@@ -225,6 +225,8 @@ rawdat3$agg_desc <- ifelse(grepl("§68", rawdat3$statute), "Embezzlement", rawda
 rawdat3$agg_desc <- ifelse(grepl("§30", rawdat3$statute), "Hunting", rawdat3$agg_desc )
 
 unique(rawdat3$agg_desc)
+
+write_csv(rawdat3, "~/Desktop/portfolio/oklahoma/data/oklahoma/oklahoma_v1.csv")
                 # Start exploring
 
 #make relevant subset

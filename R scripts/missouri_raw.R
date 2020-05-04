@@ -35,7 +35,7 @@ library('wesanderson')
 
 #main dataset
 missouri <- read_fwf(
-   file="~/Desktop/portfolio/oklahoma/data/missouri.dat",
+   file="~/Desktop/portfolio/oklahoma/data/missouri/missouri.dat",
    fwf_widths(c(8,18,12,12,3,30,30,8,8,1,20,4,4,4,8,74,1,2,8,8,8,4,2,2,8,3,4,2,2)))
 
 missouri <- missouri %>% 
@@ -74,7 +74,9 @@ sapply(missouri, class)
 
 
 
-                # CLEAN COLUMNS: 
+                 # Clean each column : 
+
+
 
 # (1) DOCNUM: 
 
@@ -102,10 +104,12 @@ missouri$firstname <- str_to_title(missouri$firstname)
 # (6) Race: 
 
 # fine as char
+unique(missouri$race)
 
 #(7) Sex:
 
 # fine as char
+unique(missouri$sex)
 
 #(8) DOB : 
 
@@ -143,6 +147,15 @@ unique(missouri$county_offence)
 
 #This is the county of the court of record as shown on the court papers.
 unique(missouri$county_sentenced)
+
+# Get full names for counties 
+countymis <- read_xml("https://doc.mo.gov/sites/doc/files/2018-01/sunshine_counties.xml")
+county_sentenced <- countymis %>% xml_find_all("//acronym") %>% xml_text()
+county_name <- countymis %>% xml_find_all("//fullname") %>% xml_text()
+
+# cbind columns
+counties <-  as.data.frame(cbind(county_sentenced,county_name))
+
 
 # (14) NCIC : 
 
@@ -185,7 +198,7 @@ missouri$sen_date <- ymd(missouri$sen_date)
 
 # a. 
 #Make a variable that stores the category of incarceration : Life, Inc., Prob. added later
-missouri$cat_inc <- ifelse(grepl("99999999", missouri$maxrelease), "LIFE", "Incarcerated")
+missouri$cat_inc <- ifelse(grepl("99999999", missouri$maxrelease), "LIFE", "Incarceration")
 missouri$cat_inc <- ifelse(grepl("88888888", missouri$maxrelease), "Indeterminate", missouri$cat_inc)
 missouri$cat_inc <- ifelse(grepl("66666666", missouri$maxrelease), "Investigation", missouri$cat_inc)
 
@@ -241,7 +254,25 @@ missouri$problen_mo <- as.numeric(missouri$problen_mo)
 missouri$problen_day <- as.numeric(missouri$problen_day)
 
 
-# 30 (State)
+# Take out unnecessary columns
 
-missouri$treat <- 0
+missouriv1 <- missouri %>% 
+  select(1,2,3,6,7,8,9,11,13,15,16,17,18,19,20,22:30)
+
+#Make a total incarceration column : Differencing day sentenced and Max release date
+
+missouriv1$sentence <- difftime(missouriv1$maxrelease, missouriv1$sen_date, units="days")
+
+
+#Make a total probation column:
+
+missouriv1$probation <- (missouriv1$problen * 365.25) + (missouriv1$problen_mo * 30.42) + ( missouriv1$problen_day)
+
+# Save dataset
+
+missouri
+
+write_csv(missouriv1,  "~/Desktop/portfolio/oklahoma/data/missouri/missouri_v1.csv")
+
+
 
