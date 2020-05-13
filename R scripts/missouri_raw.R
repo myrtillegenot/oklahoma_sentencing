@@ -2,6 +2,15 @@
 # Code : Thesis Code with MIS_DOC data
 # Date: 18/04/2020
 
+
+
+#Naming conventions: 
+# v1 -> refers to Version1 (shortened from whole original dataset)
+
+
+
+
+
 library('Rcpp')
 library('haven') 
 library('dplyr') 
@@ -80,7 +89,8 @@ sapply(missouri, class)
 
 # (1) DOCNUM: 
 
-#--> fine as character
+#--> make factor
+missouri$DOCNum <- as.factor(missouri$DOCNum)
 
 # (2) Last Name :
 
@@ -154,8 +164,7 @@ county_sentenced <- countymis %>% xml_find_all("//acronym") %>% xml_text()
 county_name <- countymis %>% xml_find_all("//fullname") %>% xml_text()
 
 # cbind columns
-counties <-  as.data.frame(cbind(county_sentenced,county_name))
-
+counties <-  as.data.frame(cbind(county_sentenced,county_name)) #counties merged in las step
 
 # (14) NCIC : 
 
@@ -173,8 +182,6 @@ counties <-  as.data.frame(cbind(county_sentenced,county_name))
 # Description of crime 
 missouri$desc <- str_to_title(missouri$desc)
 
-
-
 # (17) Complete Flag: 
 
 #This is the flag which will be set to Y = yes when a sentence is completed
@@ -183,7 +190,7 @@ missouri$desc <- str_to_title(missouri$desc)
 
 #This indicates whether this sentence is being served concurrent/consecutive to another sentence.  
 #This relationship of sentences is derived from the sentence and judgement papers. 
-#The allowed values are: ' ' - Single Sentence or Primary Sentence, 'CC' - Concurrent, 'CS' - Consecutive
+#The allowed values are: ' '- Single Sentence or Primary Sentence, 'CC' - Concurrent, 'CS' - Consecutive
 
 # (19) Sen_date : 
 
@@ -198,9 +205,10 @@ missouri$sen_date <- ymd(missouri$sen_date)
 
 # a. 
 #Make a variable that stores the category of incarceration : Life, Inc., Prob. added later
-missouri$cat_inc <- ifelse(grepl("99999999", missouri$maxrelease), "LIFE", "Incarceration")
+missouri$cat_inc <- ifelse(grepl("99999999", missouri$maxrelease), "Life", "Incarceration")
 missouri$cat_inc <- ifelse(grepl("88888888", missouri$maxrelease), "Indeterminate", missouri$cat_inc)
 missouri$cat_inc <- ifelse(grepl("66666666", missouri$maxrelease), "Investigation", missouri$cat_inc)
+missouri$cat_inc <- ifelse(grepl("SES", missouri$prob_type), "Probation", missouri$cat_inc)
 
 # b.
 #Now turn to dates 
@@ -265,14 +273,20 @@ missouriv1$sentence <- difftime(missouriv1$maxrelease, missouriv1$sen_date, unit
 
 
 #Make a total probation column:
+missouriv1$probation <- (missouriv1$problen * 365.25) + (missouriv1$problen_mo * 30.42) + (missouriv1$problen_day)
 
-missouriv1$probation <- (missouriv1$problen * 365.25) + (missouriv1$problen_mo * 30.42) + ( missouriv1$problen_day)
 
-# Save dataset
+#Merge with county data
+missouri_cl <- merge(counties, missouriv1, by ="county_sentenced")
 
-missouri
 
+
+#Save dataset
 write_csv(missouriv1,  "~/Desktop/portfolio/oklahoma/data/missouri/missouri_v1.csv")
+
+write_csv(missouri_cl,  "~/Desktop/portfolio/oklahoma/data/missouri/missouri_cl.csv")
+
+unique(missouri_cl$cat_inc)
 
 
 

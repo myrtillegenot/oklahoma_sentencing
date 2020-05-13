@@ -215,6 +215,7 @@ n <- rawdat3 %>% group_by(sex) %>% count()
 
 rawdat3$desc <- str_to_title(rawdat3$desc)
 
+
 #make broader categories -- data on statutes available at Justia website. 
 
 rawdat3$agg_desc <- "Other"
