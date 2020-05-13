@@ -22,7 +22,7 @@ Following conviction, most prisoners were sent to prison camps and **leased to p
 
 **Martin Talbert**, arrested in 1922 for riding a train without a ticket and failing to pay the subsequent 25$ fine, was leased to Putnam Lumber Yard in Dixie County Florida where he was **flogged to death** by prison guard Thomas Higginbotham.
 
-Talbert’s $25 fine had actually been paid** by his family, which had rushed the money upon hearing of his arrest. However, it was widely known that **Sheriff J R Jones touched a ‘$20 head fee for each able bodied man he turned to the lumber company.’** Had he processed the fine, he would have lost Talbert’s head fee.
+**Talbert’s $25 fine had actually been paid** by his family, which had rushed the money upon hearing of his arrest. However, it was widely known that **Sheriff J R Jones touched a ‘$20 head fee for each able bodied man he turned to the lumber company.’** Had he processed the fine, he would have lost Talbert’s head fee.
 
 
 
