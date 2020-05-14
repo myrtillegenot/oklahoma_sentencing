@@ -4,7 +4,7 @@
 
 
 
-###### I. Motivation 
+##### Motivation 
 
 ***
 
@@ -30,7 +30,7 @@ Following conviction, most prisoners were sent to prison camps and **leased to p
 
 **Talbert’s $25 fine had actually been paid** by his family, which had rushed the money upon hearing of his arrest. However, it was widely known that **Sheriff J. R. Jones touched a ‘$20 head fee for each able bodied man he turned to the lumber company.’** Had he processed the fine, he would have lost Talbert’s head fee.
 
-Disbanding prison camps was difficult as they were protected by the wealthy and well connected. For example, **Knabb Turpentine** in nearby Baker county, described by a contemporary prison supervisor as a **"human slaughter pen"** was owned by **State Senator Knabb** (fourth to the left below).
+Disbanding prison camps was difficult as they were protected by the wealthy and well connected. For example, **Knabb Turpentine** in nearby Baker county, described by a contemporary prison supervisor as a **"human slaughter pen"** was owned by **State Senator Knabb** (fourth from the left).
 
 put in conclu // Prize winning work from economists like XX have shown that these sort of institutional outcomes have long shadows.One of his descendents, Todd Knabb is now a the county sheriff at the local county jail.  *source : Baker County Press*
 
@@ -52,7 +52,7 @@ T. Don Hutto worked as a warden at the Ramsey Prison Farm for African-Americans 
 
 
 
-###### II. Research Question 
+##### Research Question 
 
 ***
 
@@ -84,7 +84,7 @@ Luckily, the impossibility of time travel and alternate dimension creation does 
 
 
 
-###### III. Methodology 
+##### III. Methodology
 
 ***
 
@@ -118,14 +118,16 @@ To isolate the effects of the introduction of private prisons, I will be using a
   | --------------------- | -------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
   | **Treated Group (1)** | E(Y\|G = T, T=0)                       | E(Y\|G = T, T=1)                            | **Diff 1** : change in outcome for  group T over time |
   | **Control Group (0)** | E(Y\|G = C, T=0)                       | E(Y\|G = C, T=1)                            | **Diff 2** : change in outcome for  group C over time |
-  |                       | Baseline diff in **T** vs **C **groups | Post-treatment diff in **T** vs **C** group |                                                       |
+  |                       | Baseline diff in **T** vs **C** groups | Post-treatment diff in **T** vs **C** group |                                                       |
 
   
 
   Our estimate of the impact of the treatment ( in ~technical~ terms the Average Treatment Effect on the Treated - the **ATT**) is thus the difference between **Diff 1** and **Diff 2**, or:
-  $$
-  ( E(Y1|T1) - E(Y1|T0) ) - ( E(Y0|T1) - E(Y0|T0) )
-  $$
+
+  
+
+  
+
   
 
   This can be calculated using the simple mean differences above, but of course, a more precise way to calculate this impact is through **regression**, which permits us to control for other variables which we think may affect our estimate ( as well as conduct hypothesis testing, which in this case will be difficult. More on this below).
@@ -134,7 +136,7 @@ To isolate the effects of the introduction of private prisons, I will be using a
 
   
   $$
-  Y = \mathbf{B}_0 + \mathbf{B}_1  T + \mathbf{B}_2 G +  \mathbf{B}_3 T \times\ G +  \mathbf{B}_4 X + \mathbf{e} 
+  Y = \mathbf{B}_0 + \mathbf{B}_1  T + \mathbf{B}_2 G +  \mathbf{B}_3 T \times\ G +  \mathbf{B}_4 X + \mathbf{e}
   $$
   
 
@@ -158,11 +160,15 @@ To isolate the effects of the introduction of private prisons, I will be using a
 
   
 
-  ###### IV. Theory
+  ##### IV. Theory 
+
+  ***
+
+  
 
   Why **sentencing lengths**?
 
-  To understand why I chose this, I will both walk through my reasoning and succinctly summarise relevant academic literature. 
+  To understand why I chose this, I will walk through my reasoning and summarise the relevant academic literature. 
 
   
 
@@ -216,7 +222,11 @@ To isolate the effects of the introduction of private prisons, I will be using a
 
   
 
-  ###### V. Data - finally! 
+  ##### V. Data 
+
+  ***
+
+  
 
   Data for both states are made publicly available on their respective Department of Correction websites. 
 
@@ -227,6 +237,12 @@ To isolate the effects of the introduction of private prisons, I will be using a
   Both datasets are at a granular level, with rich information concerning sentencing decisions for all inmates spanning several decades. Data was cleaned through the scripts folder, available in this repo, and was complemented using some light web-scraping for any relevant information they did not have (such as population data per county etc.)
 
   It is important to note that both datasets suffer from light inconsistencies (especially Oklahoman data), which should not affect this subsequent analysis, but it cannot be ruled out entirely. 
+
+  
+
+  The first thing I wanted to do was understand my data : 
+
+  
 
   
 
