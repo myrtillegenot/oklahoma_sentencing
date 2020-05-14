@@ -66,7 +66,7 @@ CoreCivic Founders, featuring a snapshot of their political connections, Tennese
 
 
 
-#### Reseach Question 
+#### Research Question 
 
 ***
 
@@ -74,7 +74,7 @@ CoreCivic Founders, featuring a snapshot of their political connections, Tennese
 
 **Ideally**
 
-###### Does the introduction of private prisons lead to distortions in the justice system? Specifically, does the use of private prisons have an effect on criminal justice outcomes?
+**Does the introduction of private prisons lead to distortions in the justice system? Specifically, does the use of private prisons have an effect on criminal justice outcomes?**
 
 Given time and data constraints, answering such a broad, sweeping question is beyond the scope of this project. However, I can use econometric methods to answer a narrower, but adjacent, question. 
 
@@ -82,7 +82,7 @@ Given time and data constraints, answering such a broad, sweeping question is be
 
 **My question**
 
-###### Did the introduction of private prisons in **Oklahoma** have an effect on sentencing lengths?
+**Did the introduction of private prisons in Oklahoma have an effect on sentencing lengths?**
 
 Private prisons are used at both the federal and state level. While detailed sentencing data at the federal level is available through the United States Sentencing Commission, my identification strategy (as detailed below) is not consistent with this data. 
 
