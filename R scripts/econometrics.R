@@ -209,7 +209,9 @@ NA_ok_mis_dt <- ok_mis_dt %>%
 
 ## D. DATA ANALYSIS 
 
-# Incarceration only ( no life, probation etc)
+
+
+# Incarceration only (no life, probation etc)
 
 incarceration <- ok_mis_dt %>% 
   filter(year >= "1950-01-01" & year <= "2019-01-01") %>% 
@@ -217,12 +219,19 @@ incarceration <- ok_mis_dt %>%
 
 # Average Number offence per inmate
 
-incarceration_uniqueinmates <- ok_mis_dt %>% 
-  filter(year >= "1950-01-01" & year <= "2019-01-01") %>% 
-  filter(code =="Incarceration") %>% 
+uniqueinmates <- incarceration %>% 
   group_by(state) %>% 
-  count(count = n_distinct(DOCNum)) %>% 
-  mutate( av_offence = n/count)
+  count(Distinct_Inmates = n_distinct(DOCNum)) %>% 
+  mutate( Average_Num_Offence = n/Distinct_Inmates) %>% 
+  rename( Total_Inmates = n,
+          State = state)
+
+
+library("formattable")
+formattable(uniqueinmates,
+            align =c("l","c","c","c","c", "c", "c", "c", "r"),
+            list(`Column` = formatter(
+              "span", style = ~ style(color = "grey",font.weight = "bold")))) 
   
 # Most common charges for incarceration in Missouri and Oklahoma : Repeat offenders included. 
 
@@ -242,14 +251,23 @@ ok_common_incarceration <- incarceration %>%
 
 # Most common charges for incarceration in Missouri and Oklahoma : Repeat offenders NOT included (1st time offenders only)
 
-mis_1st_charges <- ok_mis_dt %>% 
+mis_1st_charges <- incarceration %>% 
   group_by(DOCNum, state) %>% 
   filter(yearmonth == min(yearmonth)) %>% 
-  filter(code =="Incarceration" & state =="MIS")
+  filter(state =="MIS") %>% 
+  group_by(year) %>% 
+  count(statute,desc) %>% 
+  mutate(tot_offence = sum(n), perc = (n/tot_offence)*100) %>% 
+  slice(which.max(n))
   
-
-
-
+ok_1st_charges <- incarceration %>% 
+  group_by(DOCNum, state) %>% 
+  filter(yearmonth == min(yearmonth)) %>% 
+  filter(state =="OK") %>% 
+  group_by(year) %>% 
+  count(statute,desc) %>% 
+  mutate(tot_offence = sum(n), perc = (n/tot_offence)*100) %>% 
+  slice(which.max(n))
 
 
 #Look at most common charges across states : Not just incarceration. 
@@ -279,73 +297,234 @@ uniqueinmates <- ok_mis_dt %>%
   rename(inmate =3) %>% 
   mutate(cumulative_inmates = cumsum(inmate))
 
-#Unique inmate count
-uniqueinmates_count <- ok_mis_dt %>% 
-  filter(year >= "1950-01-01" & year <= "2019-01-01") %>% 
-  group_by(state) %>% 
-  summarise(n_distinct(DOCNum)) 
+#Unique inmate count : incarcerated
+prison_uniqueinmates <- incarceration %>% 
+  group_by(state, year) %>% 
+  summarise(n_distinct(DOCNum)) %>% 
+  rename(inmate =3) %>% 
+  mutate(cumulative_inmates = cumsum(inmate))
 
-
-
-
+#Graph 1 :
 #Inmate growth : non-cumulative (amount of new inmates every year)
-ggplot(uniqueinmates, aes( x= year, y=inmate, colour=state)) +
-  geom_line()
+inmate_count <- ggplot(prison_uniqueinmates , aes( x= year, y=inmate, colour=state)) +
+  geom_line() +
+  labs(y = 'Count of inmates',
+       title = 'Count of inmates through DOC systems', 
+       subtitle = 'Non-cumulative\n\n',
+       caption = 'Data from the Missouri Department of Corrections. \nDownload : April 2020') +
+  theme(text = element_text(family = 'Source Sans Pro'),
+        #plot text
+        plot.title = element_text(margin = margin(t = 20), face="bold", vjust = 2, family = 'Roboto Black'),
+        plot.subtitle = element_text(size = 9,face="bold", family ="Source Sans Pro"),
+        plot.caption = element_text(margin = margin(t = 15), hjust = 0, size =8),
+        #asix
+        axis.title.y = element_text(size = 9,family ="Roboto Black", angle = 0, margin = margin(t = 0, r = -20 , b = 0, l = 0),),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face="bold", size = 8, angle = 0),
+        axis.text.x = element_text(size =5),
+        axis.line.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.line.y = element_line(colour="grey40", size = 0.3), axis.ticks.y = element_blank(),
+        #legend
+        legend.title = element_blank(), legend.text = element_text(size = 7),
+        legend.key = element_blank(), legend.position = "bottom", legend.box="vertical", 
+        legend.background = element_rect(colour ="white", fill=alpha(0.8)),
+        #panels
+        panel.background = element_rect(fill = NA),
+        panel.grid.major = element_line(colour = "grey50", size = 0.1),
+        panel.grid.major.x = element_blank(),
+        plot.margin = unit(c(0,1,0,1), "cm"))
+inmate_count
 
-#Inmate growth : cumulative
-
-ggplot(uniqueinmates, aes( x= year, y=cumulative_inmates, colour=state)) +
-  geom_line()
+ggsave(inmate_count, file ='~/Desktop/portfolio/oklahoma/scripts/graphs/inmatecount.png', width=6, height=6)
 
 
+## SENTENCES
 
-# Take first occurence of person dealing with correctional system as a whole ( alternative, first time they went to jail / would have to control for having previous probation).
+# Using just incarcerated inmates, create average sentence per year 
 
-did_data <- ok_mis_dt %>% 
-  # year and date stuff
-  filter(yearmonth >= "1990-01-01" & yearmonth <= "1999-12-01") %>% 
-  mutate(yeardum = year(yearmonth)) %>% 
-  mutate(year= ymd(yeardum, truncated = 2)) %>% 
-  # group by DOCNum and state
+average_year_sentence <- incarceration %>% 
+  filter(!is.na(sentence), !sentence<0) %>% 
+  filter(year >= "1990-01-01" & year <= "1999-01-01") %>% 
+  mutate(sentence_inyears = sentence / 365.25) %>% 
+  filter(!sentence_inyears > 80) %>% 
+  group_by(state, year) %>% 
+  mutate(average_sentence = mean(sentence_inyears))
+
+parallel <- ggplot(average_year_sentence, aes( x= year, y=average_sentence, colour = state)) +
+  geom_line() +
+  geom_vline(xintercept = as.numeric(as.Date("1996-01-01")), colour = "grey", linetype='dashed') +
+  scale_colour_manual(values=c("#4b878b", "#d01c01")) +
+  labs(y = 'Average Sentence',
+       title = 'Parallel Trends : Average Sentences (in years)', 
+       subtitle = 'Not quite there\n\n',
+       caption = 'Data from the Missouri and Oklahoma Department of Corrections. \nDownload : April 2020') +
+  annotate("text", y = 7.2 , x = as.Date("1996-09-01"), label = "Title 57", family="Source Sans Pro", size = 3) +
+  theme(text = element_text(family = 'Source Sans Pro'),
+        #plot text
+        plot.title = element_text(margin = margin(t = 20), face="bold", vjust = 2, family = 'Roboto Black'),
+        plot.subtitle = element_text(size = 9,face="bold", family ="Source Sans Pro"),
+        plot.caption = element_text(margin = margin(t = 15), hjust = 0, size =8),
+        #asix
+        axis.title.y = element_text(size = 9,family ="Roboto Black", angle = 90),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(face="bold", size = 8, angle = 0),
+        axis.text.x = element_text(size =5),
+        axis.line.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.line.y = element_line(colour="grey40", size = 0.3), axis.ticks.y = element_blank(),
+        #legend
+        legend.title = element_blank(), legend.text = element_text(size = 7),
+        legend.key = element_blank(), legend.position = "bottom", legend.box="vertical", 
+        legend.background = element_rect(colour ="white", fill=alpha(0.8)),
+        #panels
+        panel.background = element_rect(fill = NA),
+        panel.grid.major = element_line(colour = "grey50", size = 0.1),
+        panel.grid.major.x = element_blank(),
+        plot.margin = unit(c(0,1,0,1), "cm"))
+
+ggsave(parallel, file ='~/Desktop/portfolio/oklahoma/scripts/graphs/parallel.png', width=6, height=6)
+
+# Histogram for logged average sentence in specific year to show semi normal distribution 
+
+hist1995 <- average_year_sentence %>% 
+  mutate(log_sentence = log(sentence_inyears))
+
+labels <- c(MIS = "Missouri", OK = "Oklahoma")
+
+histograms <- ggplot(hist1995, aes(x= log_sentence, fill= state, colour =state)) +
+  geom_histogram(position="identity", alpha=0.5) +
+  facet_wrap(. ~state, labeller=labeller(state = labels)) +
+  scale_x_continuous(limits = c(0.0, 5.0), 
+                     breaks = c(seq(0,5, 2.5))) +
+  scale_colour_manual(values=c("#4b878b", "#d01c01")) +
+  scale_fill_manual(values=c("#4b878b", "#d01c01")) +
+  labs(y = 'Count',
+       x = "Log Sentence in Years",
+       title = 'Histogram : Logged Sentence (in years)', 
+       subtitle = 'For Missouri and Oklahoma\n\n',
+       caption = 'Data from the Missouri and Oklahoma Department of Corrections. \nDownload : April 2020') +
+  theme(text = element_text(family = 'Source Sans Pro'),
+        #plot text
+        plot.title = element_text(margin = margin(t = 20), face="bold", vjust = 2, family = 'Roboto Black'),
+        plot.subtitle = element_text(size = 9,face="bold", family ="Source Sans Pro"),
+        plot.caption = element_text(margin = margin(t = 15), hjust = 0, size =8),
+        #asix
+        axis.title.y = element_text(size = 9,family ="Roboto Black", angle = 90),
+        axis.title.x = element_text(size = 9,family ="Roboto Black", angle = 0),
+        axis.text.y = element_text(face="bold", size = 8, angle = 0),
+        axis.text.x = element_text(face="bold", size = 8, angle = 0),
+        #legend
+        legend.position = "none",
+        #panels
+        panel.background = element_rect(fill = NA),
+        panel.grid.major = element_line(colour = "grey50", size = 0.1),
+        panel.grid.major.x = element_blank(),
+        plot.margin = unit(c(0,1,0,1), "cm"),
+        #strip for label facets
+        strip.background =element_rect(fill = NA),
+        strip.text = element_text(size = 9,family ="Roboto Black", angle = 0))
+
+ggsave(histograms, file ='~/Desktop/portfolio/oklahoma/scripts/graphs/histogram.png', width=6, height=6)
+
+#Mean box plots
+average_year_sentence$timedummy <- ifelse(average_year_sentence$year < "1996-01-01", 0, 1)
+
+statsum <- ggplot(average_year_sentence , aes(x = state, y = sentence_inyears)) +
+  stat_summary(geom = "pointrange", size = 1, color = "#e2c240",
+               fun.data = "mean_se", fun.args = list(mult = 1.96)) +
+  facet_wrap(~timedummy) +
+  labs(y = 'Sentence in years',
+       x = "State",
+       title = 'Average Sentence : Before and After Treatment', 
+       subtitle = 'For Missouri and Oklahoma (1990-1999)\n\n',
+       caption = 'Data from the Missouri and Oklahoma Department of Corrections. \nDownload : April 2020') +
+  theme(text = element_text(family = 'Source Sans Pro'),
+        #plot text
+        plot.title = element_text(margin = margin(t = 20), face="bold", vjust = 2, family = 'Roboto Black'),
+        plot.subtitle = element_text(size = 9,face="bold", family ="Source Sans Pro"),
+        plot.caption = element_text(margin = margin(t = 15), hjust = 0, size =8),
+        #asix
+        axis.title.y = element_text(size = 9,family ="Roboto Black", angle = 90),
+        axis.title.x = element_text(size = 9,family ="Roboto Black", angle = 0),
+        axis.text.y = element_text(face="bold", size = 8, angle = 0),
+        axis.text.x = element_text(face="bold", size = 8, angle = 0),
+        #legend
+        legend.position = "none",
+        #panels
+        panel.background = element_rect(fill = NA),
+        panel.grid.major = element_line(colour = "grey50", size = 0.1),
+        plot.margin = unit(c(0,1,0,1), "cm"),
+        #strip for label facets
+        strip.background =element_rect(fill = NA),
+        strip.text = element_text(size = 9,family ="Roboto Black", angle = 0))
+
+ggsave(statsum, file ='~/Desktop/portfolio/oklahoma/scripts/graphs/statsum.png', width=6, height=6)
+
+
+
+# Tobit for censored data
+
+
+
+
+#No covariates, regular errors for now. 
+
+
+clean_data <- incarceration %>% 
   group_by(DOCNum, state) %>% 
-  filter(yearmonth == min(yearmonth)) %>% 
-  filter(code =="Incarceration" | code =="Incarcerated") %>% 
-  distinct()
-  
+  filter(yearmonth == min(yearmonth))
+
+clean_data2 <- clean_data %>% 
+  filter(!is.na(sentence), sentence > 0) %>% 
+  mutate(logsentence = log(sentence),
+         statedummy = ifelse(state =="OK",1,0),
+         timedummy = ifelse(year == "1996-01-01",1,0)) %>% 
+  filter(year >= "1994-01-01" & year <= "1998-01-01")
+
+
+clean_data2$interaction <- clean_data2$statedummy * clean_data2$timedummy
+model_small <- lm(logsentence ~ statedummy + timedummy + interaction,
+                  data = clean_data2)
+
+
+model_big <- lm(logsentence ~ statedummy + timedummy + interaction + sex + race + crimetype,
+                data = clean_data2)
+
+library(broom)
+tidy(model_small)
+tidy(model_big)
+
+library(pixiedust)
+library(kableExtra)
+library(huxtable)
+
+reg <- huxreg(model_small, model_big, number_format = 2) %>% 
+  kable()
+
+reg
+
+#Wild Cluster 
+
+# have to manually make the interaction variable 
+library(clusterSEs)
+clean_data2$interaction <- clean_data2$statedummy * clean_data2$timedummy
+model_wildcluster1 <- glm(logsentence ~ statedummy + timedummy + interaction,
+                          data = clean_data2)
+
+wildcluster <- cluster.wild.glm(model_wildcluster1, dat = clean_data2,cluster = ~state, boot.reps = 1000,report = TRUE, prog.bar = TRUE, seed = 2516)
 
 
 
-#How much data is missing 
-
-NA_diddata <- did_data %>% 
-   map_df(~sum(is.na(.))) %>% 
-  gather() %>% 
-   rename( Column = 1,
-          NAs = 2)
-
-# Clean table for NA values 
-
-formattable(NA_diddata,
-            align =c("l","c","c","c","c", "c", "c", "c", "r"),
-            list(`Column` = formatter(
-              "span", style = ~ style(color = "grey",font.weight = "bold")))) 
 
 
 
-# Get an idea of the spread of sentences in each state
-
-num_inmate_year <- did_data %>% 
-  group_by(year, state) %>% 
-  count(n_distinct(DOCNum)) %>% 
-  rename(Distinct_DOC =3) %>% 
-  select(1,2,3)
-
-# A little bit misleading bc it has ot be weighted by population and other types of inmates
-ggplot(num_inmate_year, aes( x= year, y = Distinct_DOC, color= state)) +
-         geom_line()
 
 
-# Sentence lenght 
+
+
+
+
+
+#Appendix
 
 # Look at sentence range : took the log here which is much better -- looks approx normal for Mis, Ok has a fat right tail tho and no left tail . 
 
@@ -353,60 +532,30 @@ ggplot (did_data, aes(x= year, y = log(sentence))) +
   geom_jitter(alpha=0.1) +
   facet_wrap(~ state)
 
+ggplot(incarceration, aes(x= year, y = log(sentence))) +
+  geom_jitter(alpha=0.1) +
+  facet_wrap(~ state)
+
+
 ggplot (did_data, aes(x= year, y = sentence)) +
   geom_jitter(alpha=0.1) +
   facet_wrap(~ state)
 
 
 
-#There are some stratified sentences in the Oklahoma data which makes sense. Maybe a minimum sentence or type of crime
 
-# Look at summed sentence range : number of counts they have (control for?)
 
-offence_count <- did_data %>% 
-  group_by(DOCNum, state,year) %>% 
-  count()
 
-sum_sentences <- did_data %>% 
-  group_by(DOCNum, state,year) %>% 
-  summarise(sum_sentence = sum(sentence)) %>% 
-  filter(sum_sentence > 0) %>% 
-  distinct()
 
-did_sumsentence <- merge(offence_count, sum_sentences, by="DOCNum") %>%
-  mutate(log_sentence = log(sum_sentence)) %>% 
-  select(1,2,3,4,7,8) %>% 
-  rename( state =2,
-          year =3)
 
-did_sumsentence$timedummy <- ifelse(did_sumsentence$year < "1996-01-01", 0, 1)
 
-#Histogram 
-hist1996 <- did_sumsentence %>% 
-  filter( year == "1995-01-01") 
 
-ggplot(hist1996, aes(x= log_sentence)) +
-  geom_histogram() +
-  facet_wrap(~state)
 
-# Plot using logged sentece sums
-ggplot (did_sumsentence, aes(x= year, y = log_sentence)) +
-  geom_jitter(alpha=0.1) +
-  facet_wrap(~ state)
 
-#Calculate group means
 
-did_means <- did_sumsentence %>% 
-  group_by(state,timedummy) %>% 
-  summarise(mean_sumsentences = mean(sum_sentence))
 
 
-# Means Before and After Treatment : USE THIS GRAPH FOR DID 
 
-ggplot(did_sumsentence, aes(x = state, y = sum_sentence)) +
-  stat_summary(geom = "pointrange", size = 1, color = "red",
-               fun.data = "mean_se", fun.args = list(mult = 1.96)) +
-  facet_wrap(~timedummy)
 
 
 
@@ -441,198 +590,6 @@ ggplot(did_sumsentence, aes(x = state, y = sum_sentence)) +
 
 
 
-
-# Scrap code
-
-
-  #First occurance
-  group_by(DOCNum, state) %>% 
-  filter(yearmonth == min(yearmonth)) %>% 
-  #Create month dummy to get yearly dates 
-  mutate(yeardum = year(yearmonth)) %>% 
-  mutate(year= ymd(yeardum, truncated = 2)) %>% 
-  #Maybe use this to look at het treatment effects later
-  filter(code =="Incarceration" | code =="Incarcerated") %>% 
-  #Use time range I want
-  filter(year >= "1990-01-01" & year <= "1999-01-01") %>% 
-  #Make correct groups 
-  group_by(DOCNum, state, year) %>% 
-  mutate(sentence_sum = sum(sentence)) 
-
-
-
-
-
-
-
-
-
-
-# Core Civic Share Prices
-
-corecivic <- read_csv("~/Desktop/portfolio/oklahoma/data/corecivic.csv")
-corecivic$Date <- ymd(corecivic$Date)
-  
-  
-
-ggplot(corecivic, aes(y=Close, x=Date)) +
-  geom_line() +
-  scale_x_date(expand =c(0,0), date_labels="%Y", date_breaks  ="5 years")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Visual 1 : Count of incarceration per year 
-
-count_incarceration <- ok_mis_dt  %>% 
-  filter(ppdt$code =="Incarceration" | ppdt$code =="Incarcerated") %>% 
-  mutate(yeardum = year(yearmonth)) %>% 
-  mutate(year= ymd(yeardum, truncated = 2)) %>% 
-  group_by(year, state) %>% 
-  summarise(Unique_Elements = sum(n_distinct(DOCNum))) %>% 
-  select(year, state, Unique_Elements) %>% 
-  filter(year >= "1990-01-01" & year <= "1999-01-01")
-
-ggplot(count_incarceration, aes(x=year, y=Unique_Elements, colour = state)) +
-  geom_line() 
-
-
-# Visual 2 : Count of people dealing with correctional per year 
-
-count_corrections <- ok_mis_dt  %>% 
-  mutate(yeardum = year(yearmonth)) %>% 
-  mutate(year= ymd(yeardum, truncated = 2)) %>% 
-  group_by(year, state) %>% 
-  summarise(Unique_Elements = sum(n_distinct(DOCNum))) %>% 
-  select(year, state, Unique_Elements) %>% 
-  filter(year >= "1990-01-01" & year <= "1999-01-01")
-
-ggplot(count_corrections, aes(x=year, y=Unique_Elements, colour = state)) +
-  geom_line() 
-
-
-# Visual 3 : Average sentence delivered per year, for first offences per DOCNum (excluding life sentences)
-
-
-# Step 1 - 
-average_sentence <- ok_mis_dt  %>% 
-  
-#Keep only first record of conviction
-  group_by(DOCNum, state) %>% 
-  filter(yearmonth == min(yearmonth)) %>% 
-  mutate(effective_life = ifelse(sentence > 29200 & code == "Incarceration" | code == "Incarcerated" , "life", "notlife"))
-
-DOCNum_effectivelifers <- average_sentence %>% 
-  filter(effective_life == "life") %>% 
-  select(DOCNum) %>% 
-  distinct()
-
-DOC_lifers <- DOCNum_effectivelifers$DOCNum
-
-
-average_sentence_nl <- average_sentence 
-average_sentence_nl$yeardum <- year(average_sentence_nl$yearmonth)
-average_sentence_nl$year <- ymd(average_sentence_nl$yeardum, truncated = 2)
-
-
-# Median sentences
-med_sentences <- average_sentence_nl %>% 
-  filter(!is.na(sentence), sentence >0) %>% 
-  group_by(DOCNum, yearmonth, state) %>% 
-  mutate(sentence_sum = sum(sentence)) %>% 
-  filter(!DOCNum %in% DOC_lifers) %>% 
-  group_by(year,state) %>% 
-  summarise(av_sentence_year = median(sentence_sum)) %>% 
-  filter(year >= "1990-01-01" & year <= "1999-01-01")
-
-
-# Mean sentences
-mean_sentences <- average_sentence_nl %>% 
-  filter(!is.na(sentence), sentence >0) %>% 
-  group_by(DOCNum, yearmonth, state) %>% 
-  mutate(sentence_sum = sum(sentence)) %>% 
-  filter(!DOCNum %in% DOC_lifers) %>% 
-  group_by(year,state) %>% 
-  summarise(av_sentence_year = mean(sentence_sum)) %>% 
-  filter(year >= "1990-01-01" & year <= "1999-01-01")
-
-
-ggplot(sum_sentences, aes(x=year, y=av_sentence_year, colour = state)) +
-  geom_line() 
-
-
-# Look at distribution of summed sentences
-
-sentence_distribution <- average_sentence_nl %>% 
-  filter(!is.na(sentence), sentence >0) %>% 
-  group_by(DOCNum, yearmonth, state) %>% 
-  mutate(sentence_sum = sum(sentence)) %>% 
-  filter(!DOCNum %in% DOC_lifers) %>% 
-  group_by(year, state) %>% 
-  mutate(max_sum = max(sentence_sum),
-         max_sum_years = max(sentence_sum)/365,
-         min_sum = min(sentence_sum),
-         min_sum_years = min(sentence_sum)/365) %>% 
-  select(year, state, max_sum, min_sum,max_sum_years,min_sum_years) %>% 
-  arrange(year) %>% 
-  filter(year >= "1990-01-01" & year <= "1999-01-01") %>% 
-  distinct()
-
-# Mean sentences -- mean sentences without extreme skew
-
-filtered_sentences <- average_sentence_nl %>% 
-  filter(!is.na(sentence), sentence >0) %>% 
-  group_by(DOCNum, yearmonth, state) %>% 
-  mutate(sentence_sum = sum(sentence)) %>% 
-  filter(!DOCNum %in% DOC_lifers) %>%
-  filter(!sentence_sum > 219000) %>% 
-  group_by(year, state) %>% 
-  summarise(av_sentence_year = mean(sentence_sum)) %>% 
-  filter(year >= "1990-01-01" & year <= "1999-01-01") 
-
-
-ggplot(filtered_sentences, aes(x=year, y=av_sentence_year, colour = state)) +
-  geom_line() 
-
-
-# Median sentences -- median sentences without extreme skew
-
-filtered_sentences_median <- average_sentence_nl %>% 
-  filter(!is.na(sentence), sentence >0) %>% 
-  group_by(DOCNum, yearmonth, state) %>% 
-  mutate(sentence_sum = sum(sentence)) %>% 
-  filter(!DOCNum %in% DOC_lifers) %>%
-  filter(!sentence_sum > 219000) %>% 
-  group_by(year, state) %>% 
-  summarise(av_sentence_year = median(sentence_sum)) %>% 
-  filter(year >= "1990-01-01" & year <= "1999-01-01") 
-
-
-ggplot(filtered_sentences_median, aes(x=year, y=av_sentence_year, colour = state)) +
-  geom_line() 
-
-
-## Econometrics 
-
-## Equation 
 
 
 
