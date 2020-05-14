@@ -16,13 +16,13 @@ Profit and prisons have a long history. Although the13th Amendment **abolished i
 
 This led to a quick expansion of prison populations, especially in the South, and especially of African-Americans.
 
-**Photo 1 ** *Juvenile Convicts at work in the fields, Detroit, 1903*
+**Photo 1** *Juvenile Convicts at work in the fields, Detroit, 1903*
 
 <img align="center" src="/photos/juvenileconvicts.jpg">
 
 Following conviction, most prisoners were sent to prison camps and **leased to private companies as cheap labour**. This was a violent system that led to widespread abuse and death. States disallowed private convict leasing in the 1920s due to complaints of unfair competition from businesses that paid market rates for their labour, and the polemical death of a young Caucasian man, **Martin Talbert**.
 
-**Photo 2 ** *Martin Talbert*
+**Photo 2** *Martin Talbert*
 
 <img align="left" src="/photos/martintalbert.jpg"  height="300" width="350"/>
 
@@ -112,17 +112,13 @@ To isolate the effects of the introduction of private prisons, I will be using a
 
   Neatly : 
 
-  
+  X | Time | Time
 
-  X  | Time = 0 | Time = 1
-
-  ___ | ___| ___
+  _ _ _ | _ _ _ | _ _ _
 
   Treated | yq |uu
 
   Control | dd| dd
-
-  
 
   
 
