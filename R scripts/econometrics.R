@@ -206,7 +206,53 @@ NA_ok_mis_dt <- ok_mis_dt %>%
           NAs = 2)
 
 
-#Look at most common charges across states
+
+## D. DATA ANALYSIS 
+
+# Incarceration only ( no life, probation etc)
+
+incarceration <- ok_mis_dt %>% 
+  filter(year >= "1950-01-01" & year <= "2019-01-01") %>% 
+  filter(code=="Incarceration")
+
+# Average Number offence per inmate
+
+incarceration_uniqueinmates <- ok_mis_dt %>% 
+  filter(year >= "1950-01-01" & year <= "2019-01-01") %>% 
+  filter(code =="Incarceration") %>% 
+  group_by(state) %>% 
+  count(count = n_distinct(DOCNum)) %>% 
+  mutate( av_offence = n/count)
+  
+# Most common charges for incarceration in Missouri and Oklahoma : Repeat offenders included. 
+
+mis_common_incarceration <- incarceration %>% 
+  filter(state == "MIS") %>% 
+  group_by(year) %>% 
+  count(statute,desc) %>% 
+  mutate(tot_offence = sum(n), perc = (n/tot_offence)*100) %>% 
+  slice(which.max(n))
+
+ok_common_incarceration <- incarceration %>% 
+  filter(state == "OK") %>% 
+  group_by(year) %>% 
+  count(statute,desc) %>% 
+  mutate(tot_offence = sum(n), perc = (n/tot_offence)*100) %>% 
+  slice(which.max(n))
+
+# Most common charges for incarceration in Missouri and Oklahoma : Repeat offenders NOT included (1st time offenders only)
+
+mis_1st_charges <- ok_mis_dt %>% 
+  group_by(DOCNum, state) %>% 
+  filter(yearmonth == min(yearmonth)) %>% 
+  filter(code =="Incarceration" & state =="MIS")
+  
+
+
+
+
+
+#Look at most common charges across states : Not just incarceration. 
 
 missouricharges <- ok_mis_dt %>% 
   filter(state == "MIS") %>% 
@@ -221,6 +267,7 @@ oklahomacharges <- ok_mis_dt %>%
   count(statute,desc) %>% 
   mutate(tot_offence = sum(n), perc = (n/tot_offence)*100) %>% 
   slice(which.max(n))
+
 
 # Look at unique IDs per state 
 
@@ -239,13 +286,7 @@ uniqueinmates_count <- ok_mis_dt %>%
   summarise(n_distinct(DOCNum)) 
 
 
-# Average Number offence per inmate
-incarceration_uniqueinmates <- ok_mis_dt %>% 
-  filter(year >= "1950-01-01" & year <= "2019-01-01") %>% 
-  filter(code =="Incarceration") %>% 
-  group_by(state) %>% 
-  count(count = n_distinct(DOCNum)) %>% 
-  mutate( av_offence = n/count)
+
 
 #Inmate growth : non-cumulative (amount of new inmates every year)
 ggplot(uniqueinmates, aes( x= year, y=inmate, colour=state)) +
