@@ -284,7 +284,7 @@ The understand my data more,  I created some quick visualisations:
 
 
 
-<img align="center" src="/photos/inmatecount.jpg">
+<img align="center" src="/photos/inmatecount.png">
 
 This count uses incarceration sentences only : so excludes life sentences, death sentences, probation etc. 
 
@@ -318,7 +318,7 @@ This process was not clear-cut.  For the regressions below, I used only the firs
 
 * *Parallel trends assumption holds.* 
 
-<img align="center" src="/photos/parallel.jpg">
+<img align="center" src="/photos/parallel.png">
 
 
 
@@ -326,11 +326,11 @@ Well, not really. But there is the possibility of matching which may help with t
 
 That being said, in this visualisation, there seems to be some evidence that average sentence lenght did increase following the introduction of private prisons. Sentences have been logged, and in the second figure you can see the potential censoring discussed above. 
 
-<img align="center" src="/photos/statsum.jpg">
+<img align="center" src="/photos/statsum.png">
 
 
 
-<img align="center" src="/photos/histogram_logsentences.jpg">
+<img align="center" src="/photos/histogram_logsentences.png">
 
 
 
