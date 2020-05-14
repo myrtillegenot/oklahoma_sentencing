@@ -511,6 +511,33 @@ However, I have in good faith included wild cluster bootstrap values here:
 
 
 
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> wild cluster BS p-value </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> (Intercept) </td>
+   <td style="text-align:right;"> 0.000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> statedummy </td>
+   <td style="text-align:right;"> 0.509 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> timedummy </td>
+   <td style="text-align:right;"> 0.241 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> interaction </td>
+   <td style="text-align:right;"> 0.244 </td>
+  </tr>
+</tbody>
+</table>
+
 
 
 
