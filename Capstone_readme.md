@@ -4,9 +4,15 @@
 
 
 
-##### Motivation 
+
+
+#### Motivation 
 
 ***
+
+
+
+
 
 Profit and prisons have a long history. Although the13th Amendment **abolished involutary servitutude**, a loophole exempted prisoners from such protection.
 
@@ -52,9 +58,13 @@ T. Don Hutto worked as a warden at the Ramsey Prison Farm for African-Americans 
 
 
 
-##### Research Question 
+
+
+#### Reseach Question 
 
 ***
+
+
 
 ##### Ideally: 
 
@@ -72,6 +82,8 @@ Given time and data constraints, answering such a broad, sweeping question is be
 
 *Why this question?*
 
+
+
 Private prisons are used at both the federal and state level. While detailed sentencing data at the federal level is available through the United States Sentencing Commission, my identification strategy (as detailed below) is not consistent with this data. 
 
 Indeed, my problem is essentially one of *causal inference*. How can I make sure that any changes in sentencing are due to the introduction of private prisons, and not the result of any other miscellaneous factors?
@@ -84,9 +96,13 @@ Luckily, the impossibility of time travel and alternate dimension creation does 
 
 
 
-##### III. Methodology
+
+
+#### Methodology 
 
 ***
+
+
 
 
 
@@ -95,6 +111,10 @@ To isolate the effects of the introduction of private prisons, I will be using a
 
 
 * **What is a Differences-in-Differences framework?**
+
+  
+
+  
 
   A differences-in-differences (hitherto, **DiD**) approach needs :
 
@@ -144,7 +164,11 @@ To isolate the effects of the introduction of private prisons, I will be using a
 
   
 
-  Now that the basics are out of the way, how exactly will I be using this framework to answer my research question?
+  
+
+  **Now that the basics are out of the way, how exactly will I be using this framework to answer my research question?**
+
+  
 
   
 
@@ -152,17 +176,27 @@ To isolate the effects of the introduction of private prisons, I will be using a
 
   
 
+  
+
   In November of 1995,  the state of Oklahoma enacted Title 57 § 561, "regarding authority to provide incarceration, supervision, and residential treatment at facilities not operated by the Department of Corrections". This is my natural experiment. 
 
   In the following year, Oklahoma began to contract private prisons beds for several hundred convicted felons. However, the neighbouring state, Missouri, did not. These are my treatment and control groups. 
+
+  
+
+  
 
   > To recap : I will be using the enactment of Oklahoma Title 57 as 'treatment' for my two groups, Oklahoma and Missouri. My two time periods are 1995 and 1996. Although the law got passed in 1995, the first beds were not contracted until very late in the year, so essentially, through 1996. I posit that the introduction of private prisons in Oklahoma will have an effect on my outcome variable of choice: sentencing lengths.
 
   
 
-  ##### IV. Theory 
+  
+
+  #### IV. Theory 
 
   ***
+
+  
 
   
 
@@ -222,9 +256,13 @@ To isolate the effects of the introduction of private prisons, I will be using a
 
   
 
-  ##### V. Data 
+  
+
+  #### V. Data
 
   ***
+
+  
 
   
 
