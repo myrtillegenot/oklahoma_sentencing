@@ -16,7 +16,7 @@
 
  *Juvenile Convicts at work in the fields, Detroit, 1903*
 
-Profit and prisons have a long history. Although the13th Amendment abolished involutary servitutude, a loophole exempted prisoners from such protection.
+Profit and prisons have a long history. Although the 13th Amendment abolished involutary servitutude, a loophole exempted prisoners from such protection.
 
 
 
